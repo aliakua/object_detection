@@ -4,7 +4,7 @@ So many thanks to author of lesson - Aladdin Persson - for nice explaining.
 
 #### Data
 For object detection was used **Pascal Voc dataset** from kaggle. 
-! kaggle datasets download -d gopalbhattrai/pascal-voc-2012-dataset
+~! kaggle datasets download -d gopalbhattrai/pascal-voc-2012-dataset~
 
 Bcs of YOLO is grid-cell based object detetion technology, was necessary to do some preparation of data, which one you can find at prepare_data.py.   
 
