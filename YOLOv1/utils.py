@@ -79,7 +79,7 @@ def non_max_suppression(bboxes, iou_threshold, threshold, box_format="corners"):
         bboxes = [
             box
             for box in bboxes
-            if box[0] != chosen_box[0]
+            if box[0] != chosen_box[0] # if its not SAME class - WE DON'T WANNA COMPARE THM
             or intersection_over_union(
                 torch.tensor(chosen_box[2:]),
                 torch.tensor(box[2:]),
@@ -253,8 +253,8 @@ def get_bboxes(
         x = x.to(device)
         labels = labels.to(device)
 
-        with torch.no_grad():
-            predictions = model(x)
+        with torch.no_grad():                       #                 0 ...19,   20, 21, 22, 23, 24,   25, 26, 27, 28, 29
+            predictions = model(x)                  # predictions =[[ C1...C20, 0.9, x1, y1, x2, y2,  0.6, x1, y1, x2, y2], [ C1...C20, 10, 0.8, x1, y1, x2, y2, 10, 0.44, x1, y1, x2, y2],[]] ## S*S*(B*5+C)
 
         batch_size = x.shape[0]
         true_bboxes = cellboxes_to_boxes(labels)
@@ -288,7 +288,7 @@ def get_bboxes(
 
 
 
-def convert_cellboxes(predictions, S=7):
+def convert_best_cellboxes(predictions, S=7):
     """
     Converts bounding boxes output from Yolo with
     an image split size of S into entire image ratios
@@ -322,7 +322,7 @@ def convert_cellboxes(predictions, S=7):
 
 
 def cellboxes_to_boxes(out, S=7):
-    converted_pred = convert_cellboxes(out).reshape(out.shape[0], S * S, -1)
+    converted_pred = convert_best_cellboxes(out).reshape(out.shape[0], S * S, -1)
     converted_pred[..., 0] = converted_pred[..., 0].long()
     all_bboxes = []
 
