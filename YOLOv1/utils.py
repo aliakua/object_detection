@@ -52,7 +52,7 @@ def intersection_over_union(boxes_preds, boxes_labels, box_format="midpoint"):
     return intersection / (box1_area + box2_area - intersection + 1e-6)
 
 
-def non_max_suppression(bboxes, iou_threshold, threshold, box_format="corners"):
+def non_max_suppression(bboxes, iou_threshold, threshold, box_format="corners"): # bboxes - are already 49 best ones, just from different cells
     """
     Does Non Max Suppression given bboxes
 
@@ -69,23 +69,23 @@ def non_max_suppression(bboxes, iou_threshold, threshold, box_format="corners"):
 
     assert type(bboxes) == list
 
-    bboxes = [box for box in bboxes if box[1] > threshold]
+    bboxes = [box for box in bboxes if box[1] > threshold]       ## 49 [predicted_class, best_confidence,  x,y,w,h] ---> <49 lets assume 10
     bboxes = sorted(bboxes, key=lambda x: x[1], reverse=True)
     bboxes_after_nms = []
 
     while bboxes:
-        chosen_box = bboxes.pop(0)
+        chosen_box = bboxes.pop(0)  # max from 10
 
         bboxes = [
             box
-            for box in bboxes
-            if box[0] != chosen_box[0] # if its not SAME class - WE DON'T WANNA COMPARE THM
+            for box in bboxes       # 9
+            if box[0] != chosen_box[0] # if its not SAME class - WE DON'T WANNA COMPARE THEM 
             or intersection_over_union(
                 torch.tensor(chosen_box[2:]),
                 torch.tensor(box[2:]),
                 box_format=box_format,
             )
-            < iou_threshold
+            < iou_threshold            #discard if IOU_pred-gt > IOU_treshold, and otherwise - save 
         ]
 
         bboxes_after_nms.append(chosen_box)
@@ -257,8 +257,8 @@ def get_bboxes(
             predictions = model(x)                  # predictions =[[ C1...C20, 0.9, x1, y1, x2, y2,  0.6, x1, y1, x2, y2], [ C1...C20, 10, 0.8, x1, y1, x2, y2, 10, 0.44, x1, y1, x2, y2],[]] ## S*S*(B*5+C)
 
         batch_size = x.shape[0]
-        true_bboxes = cellboxes_to_boxes(labels)
-        bboxes = cellboxes_to_boxes(predictions)
+        true_bboxes = cellboxes_to_boxes(labels)    
+        bboxes = cellboxes_to_boxes(predictions)    # bboxes =[[ C1...C20, 0.9_best, x1_best, y1_best, x2_best, y2_best], [ C1...C20, 10, 0.8_best, x1_best, y1_best, x2_best, y2_best],[]] ## S*S*(5+C)
 
         for idx in range(batch_size):
             nms_boxes = non_max_suppression(
