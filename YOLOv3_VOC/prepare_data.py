@@ -15,7 +15,7 @@ def pascal_voc_to_yolo(x1, y1, x2, y2, image_w, image_h):
     return x_center_norm,  y_center_norm, width_norm, height_norm
 
 
-def xml_to_csv(inp_path_lbl, out_path_lbl = '/kaggle/working/labels/' ):
+def xml_to_csv(path):
     xml_list = []
     column_name = ['image_name', 'label']
     df = pd.DataFrame(columns=column_name)
@@ -39,7 +39,7 @@ def xml_to_csv(inp_path_lbl, out_path_lbl = '/kaggle/working/labels/' ):
                   ,'sofa':17
                   ,'train':18
                   ,'tvmonitor':19}
-    for xml_file in glob.glob(inp_path_lbl + '/*.xml'):
+    for xml_file in glob.glob(path + '/*.xml'):
         xml_label = []
         tree = ET.parse(xml_file)
         root = tree.getroot()
@@ -66,8 +66,8 @@ def xml_to_csv(inp_path_lbl, out_path_lbl = '/kaggle/working/labels/' ):
                 xml_label = value_label
             else:
                 xml_label = xml_label+ os.linesep + value_label
-        folder = inp_path_lbl.split('/')[-3].replace('VOC2012_','')
-        file = open(out_path_lbl + folder +'/'+ name + '.txt', 'w')
+        folder = path.split('/')[-3].replace('VOC2012_','')
+        file = open(f'/kaggle/working/labels/{folder}/{name}.txt', 'w')
         file.write(xml_label)
         file.close()
     xml_df = pd.DataFrame(xml_list, columns=column_name)
@@ -75,10 +75,10 @@ def xml_to_csv(inp_path_lbl, out_path_lbl = '/kaggle/working/labels/' ):
     return df
 
 
-def img_transfer(inp_path_img, sample, out_path_img='/kaggle/working/images/'):
-    for image in glob.glob(inp_path_img + '/*.jpg'):
+def img_transfer(path, sample):
+    for image in glob.glob(path + '/*.jpg'):
         inp = image
-        out = out_path_img + sample + '/'+ image.split('/')[-1]
+        out = '/kaggle/working/images/'+ sample + '/'+ image.split('/')[-1]
         subprocess.call(f'cp {inp} {out}', shell=True)
     print(f'Images of {sample} successfully were copied in working directory')
 
@@ -88,7 +88,8 @@ def prepare_data(folder_path= '/kaggle/input/pascal-voc-2012-dataset'):
     for ds in datasets:
         ann_path = os.path.join(folder_path , 'VOC2012_' + ds,'VOC2012_' + ds, 'Annotations')
         img_txt_csv = xml_to_csv(ann_path)
-        img_txt_csv.to_csv('{}.csv'.format(ds), index=None)
+
         image_path = os.path.join(folder_path , 'VOC2012_' + ds, 'VOC2012_' + ds, 'JPEGImages')
         img_transfer(image_path , ds)
+        img_txt_csv.to_csv('{}.csv'.format(ds), index=None)
         print(f'Successfully converted xml to csv and was created  {ds}.csv.')
