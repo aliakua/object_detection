@@ -1,4 +1,7 @@
-## YOLOv3 implemenatation
+## YOLOv3 implemen
+
+
+tation
 Here you can find implementation of Yolo_v3 from scratch on PyTorch.
 According to paper Yolov3 architecture has:
 * only convolutional layers(**no pooling layers**): for preventing of losing info during poolings
@@ -7,4 +10,7 @@ According to paper Yolov3 architecture has:
 * classification predictions **for each anchor**
 
 ### Let's dive into details
+![image](https://github.com/aliakua/object_detection/assets/159763523/2b55ad19-2a62-42f6-9089-d2992a89b0d0)
+
+
 
