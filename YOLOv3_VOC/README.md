@@ -28,7 +28,10 @@ more general below
    ![image](https://github.com/aliakua/object_detection/assets/159763523/9a8c4da2-c39c-4c6b-bf50-f3ab55d96ac1)
 
 5. Objectness score
-   * YOLOv3 predicts an objectness score for each bounding box using logistic regression
+   - YOLOv3 predicts an objectness score p0 for each bounding box using logistic regression
+   - p0 = P(object) * IoU(predicted BB & GT) = G(t0) ,
+      *    where P(object) - predicted probability of object existence
+      *    G(t0)- LogRegression for [0;1]
 7. Loss: Regression Loss + Confidence Loss + Classification Loss
    * YOLOv3 changes the way in calculating the cost function. If the bounding box prior (anchor) overlaps a ground truth object more than others, the corresponding objectness score should be 1.
    * For other priors with overlap greater than a predefined threshold (default 0.5), they incur no cost.
